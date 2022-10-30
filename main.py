@@ -23,7 +23,7 @@ Planned features:
 
 1.1 
 person A cancels person S
-timestamp T is stored
+timestamp T is stored  
 add 1 to temporary value V
 person B cancels person S
 check if timestamp is <5 minutes from timestamp T
@@ -87,6 +87,11 @@ def poll_stop(poll):
       db[target] = count
     else:
       db[target] = count + 1
+  else:
+    if(target not in db.keys()):
+      del db[target]
+    else:
+      db[target] = count 
   
   
   
@@ -96,19 +101,32 @@ def leaderboard(message):
   keys = db.keys()
   cancelled = list()
   for key in keys:
-    cancelled.append(str(db[key]) + "  " + key)
+    cancelled.append([db[key], key])
+    # cancelled.append(str(db[key]) + "  " + key)
   cancelled.sort()
   cancelled.reverse()
   output_message = ""
+  # for i in range(len(cancelled)):
+  #     print(cancelled[i])
   for i in range(len(cancelled)):
+    print(cancelled[i])
     output_message += str(i+1) + ". "
-    output_message += cancelled[i][2:] + ":  " + cancelled[i][:1] 
+    output_message += str(cancelled[i][1]) + ":  " + str(cancelled[i][0])
     output_message += "\n"
   if output_message == "":
     output_message = "leaderboard is empty as of now."
   bot.send_message(chat_id=message.chat.id, text= output_message)
   print("Leaderboard called")
 
+
+@bot.message_handler(commands = ['delete'])
+def delete_message(message):
+  if getattr(getattr(message, 'from_user'),'username') != 'wr1159':
+    bot.send_message(getattr(getattr(message,'chat'),'id'), 'you should steal weirongs phone')
+  else:
+    deleted_user = message.text[message.entities[1].offset:]
+    if deleted_user in db.keys():
+      del db[deleted_user] 
 # import asyncio
 # asyncio.run(bot.polling())
 bot.infinity_polling()
