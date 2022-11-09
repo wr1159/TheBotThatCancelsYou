@@ -63,36 +63,82 @@ def cancel(message):
   global target
   global count
   global sent_poll
+  textt= message.text.split()
+  count = 0
+  textt.remove(textt[0])
+  target = ""
+  for i in textt:
+    target += i
+    target += " "
+  print(target)
   target = message.text[message.entities[1].offset:]
+  member_list = ["@wr1159", "@nodokak", "@huaguannn", "@andr_ehh", "@IcedLatte", "@OngChongYu","@Skipperrrrrrr",  "@yoshsher","@zaoann","@charise_99", "@feliciasoenjaya", "@Jamesthie", "@kang_weii", "@y_javier", "@izbellim", "@sheriseses"]
+ 
   if target in db.keys():
     count = db[target]
-  sent_poll = bot.send_poll(chat_id= message.chat.id,
-    question= "do we cancel " + target,
-    options= ("Yes", "No"),
-    is_anonymous= False,
-    open_period = 10)
+  sent_poll = bot.send_poll(chat_id= message.chat.id, question= "do we cancel " + target,
+      options= ("Yes", "No"),
+      is_anonymous= False,
+      open_period = 10)
   print(message.text[message.entities[1].offset:])
   print("Cancel " + str(message.entities[0]))  
+ 
+
+@bot.message_handler(commands=['random'])
+def random_choice(message):
+  textt= message.text.split()
+  textt.remove(textt[0])
+  bot.send_message(chat_id = message.chat.id, text=textt[random.randint(0, len(textt)-1)])
+# def experiment(message):
+#   global target
+#   global count
+#   global sent_poll
+#   print(bot.get_chat(message.chat.id))
+#   print(bot.get_chat_member_count(message.chat.id))
+#   member_list = ["@wr1159","@nodokak","@huaguannn","@andr_ehh","@IcedLatte","@OngChongYu"," @Skipperrrrrrr", "@yoshsher","@zaoann","@charise_99", "@feliciasoenjaya","@Jamesthie", "@kang_weii", "@y_javier", "@izbellim", "@sheriseses"]
+#   counter = 0
+#   button_list = []
+
+#   # for member in member_list:
+#   #   button_list.append( InlineKeyboardButton(text=member, callback_data =member) )
+#   # keyboard_inline=InlineKeyboardMarkup().add(button_list)
   
+#   message.reply("Who do you want to cancel", reply_markup =keyboard_inline)
+#   target = message.text[message.entities[1].offset:]
+#   if target in db.keys():
+#     count = db[target]
+#   sent_poll = bot.send_poll(chat_id= message.chat.id,
+#     question= "do we cancel " + target,
+#     options= ("Yes", "No"),
+#     is_anonymous= False,
+#     open_period = 10)
+#   print(message.text[message.entities[1].offset:])
+#   print("Cancel " + str(message.entities[0]))  
 @bot.poll_handler(func = None)
 def poll_stop(poll):
   print(poll)
   # if(poll.is_closed):
   options = poll.options
-  print(options[0].voter_count)
-  print(options[1].voter_count)
-  print(target)
-  if(options[0].voter_count > options[1].voter_count):
-    if(target not in db.keys()):
-      db[target] = count
-    else:
-      db[target] = count + 1
-  else:
-    if(target not in db.keys()):
-      del db[target]
-    else:
-      db[target] = count 
+
   
+  yes_votes = options[0].voter_count
+  no_votes = options[1].voter_count
+  print(yes_votes)
+  print(no_votes)
+  print(target)
+  
+  if(yes_votes + no_votes >= 3):
+    if(yes_votes > no_votes):
+      if(target not in db.keys()):
+        db[target] = count
+      else:
+        db[target] = count + 1
+    else:
+      if(target not in db.keys()):
+        del db[target]
+      else:
+        db[target] = count 
+    
   
   
 @bot.message_handler(commands=['leaderboard'])
@@ -124,11 +170,29 @@ def delete_message(message):
   if getattr(getattr(message, 'from_user'),'username') != 'wr1159':
     bot.send_message(getattr(getattr(message,'chat'),'id'), 'you should steal weirongs phone')
   else:
-    deleted_user = message.text[message.entities[1].offset:]
+    textt= message.text
+    textt = textt.replace("/delete ","")
+    print(textt)
+    if textt in db.keys():
+      del db[textt]
+      
+@bot.message_handler(commands = ['add'])
+def add_message(message):
+  if getattr(getattr(message, 'from_user'),'username') != 'wr1159':
+    bot.send_message(getattr(getattr(message,'chat'),'id'), 'you should steal weirongs phone')
+  else:
+    split = message.text.split(" ")
+    deleted_user = split[1]
+    print(deleted_user)
+    print(split)
     if deleted_user in db.keys():
-      del db[deleted_user] 
+      db[deleted_user] +=  int(split[2])
+    else:
+      db[deleted_user] = int(split[2])
 # import asyncio
 # asyncio.run(bot.polling())
+for i in db.keys():
+  print(i)  
 bot.infinity_polling()
 
 #code to model after
